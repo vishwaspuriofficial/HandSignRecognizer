@@ -1,10 +1,15 @@
+#Title: HAND SIGN RECOGNIZER
+#Developer: Vishwas Puri
+#Purpose: A program that detects out of 8 different types of hand signs to identify, which sign you are making with your hand.
+
+#This program is made using python supported by streamlit.
 import streamlit as st
 import mediapipe as mp
 import cv2
 st.set_page_config(layout="wide")
 col = st.empty()
 
-
+#defining mediapipe's inbuilt hand recogignition models
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
@@ -29,14 +34,14 @@ st.write("Press start to turn on camera and start making hand signs!")
 
 def handDetector():
     class OpenCVVideoProcessor(VideoProcessorBase):
-
-
         def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
             img = frame.to_ndarray(format="bgr24")
-
+            # converting image to RGB
             imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            #analyze hands in the image
             results = hands.process(imgRGB)
             cv2.rectangle(img, pt1=(0,0), pt2=(700,80), color=(0,0,0), thickness= -1)
+            #gets the 22 hand points
             if results.multi_hand_landmarks:
                 # print(results.multi_hand_landmarks)
                 for handLms in results.multi_hand_landmarks:
@@ -52,6 +57,8 @@ def handDetector():
                     # print(lmList)
                     if len(lmList) != 0:
                         print(lmList)
+                        #Checks which symbol does the points orientation illustrate
+                        #writes the symbol name on the image
                         if lmList[8][2] < lmList[6][2] and lmList[12][2] > lmList[10][2] and lmList[16][2] > lmList[14][
                             2] and lmList[20][2] > lmList[18][2]:
                             cv2.putText(img, "Pointing Sign", (20, 50), cv2.FONT_HERSHEY_DUPLEX, 1, 255)
@@ -90,7 +97,7 @@ def handDetector():
                 cv2.putText(img, "No Hand Detected!", (20, 50), cv2.FONT_HERSHEY_DUPLEX, 1, 255)
             return av.VideoFrame.from_ndarray(img, format="bgr24")
 
-
+    # setting up streamlit camera configuration
     webrtc_ctx = webrtc_streamer(
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
